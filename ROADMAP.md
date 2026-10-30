@@ -1,6 +1,6 @@
 # py-toolkit — Build Roadmap
 
-Grows on rotation with my other projects (two commits a day across the account).
+Each item lands as one complete, tested change.
 
 - [x] organize.py — sort a folder by file type, with --dry-run and clash-safe names
 - [ ] dupfinder.py — find duplicate files by content hash
