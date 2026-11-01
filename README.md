@@ -11,17 +11,20 @@
 | Tool | What it does |
 |---|---|
 | `organize.py` | Sorts a messy folder into subfolders by file type (Images, Documents, Audio, Video, Archives, Code, Other). `--dry-run` previews safely; name clashes never overwrite. |
+| `dupfinder.py` | Finds duplicate files by content hash (size-grouped first, so big folders stay fast). Reports wasted space; `--move-to` quarantines the extras, nothing is ever deleted. |
 
 ## Usage
 
 ```bash
 python organize.py ~/Downloads            # organize for real
 python organize.py ~/Downloads --dry-run  # preview first
+python dupfinder.py ~/Downloads           # find duplicates by content hash
+python dupfinder.py ~/Downloads --move-to ~/dupes  # quarantine the extras
 ```
 
 ## Coming next
 
-Duplicate-file finder (hash-based) → batch renamer → folder size analyzer → image resizer. Full plan: [ROADMAP.md](ROADMAP.md).
+Batch renamer → folder size analyzer → image resizer. Full plan: [ROADMAP.md](ROADMAP.md).
 
 ## License
 
