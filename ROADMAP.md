@@ -6,7 +6,7 @@ Each item lands as one complete, tested change.
  - [x] dupfinder.py — find duplicate files by content hash
 - [x] rename.py — batch rename with patterns (prefix, numbering, replace)
 - [x] dirsize.py — biggest folders/files report for a directory tree
-- [ ] imgshrink.py — batch-resize images (Pillow-free: use stdlib where possible, note limits)
+- [x] imgshrink.py — batch-resize images (Pillow-free: use stdlib where possible, note limits)
 - [ ] textstats.py — word/line/reading-time stats for text & markdown files
 - [ ] Unified `toolkit.py` menu launcher for all tools
 - [ ] Unit tests (unittest) for organize + dupfinder

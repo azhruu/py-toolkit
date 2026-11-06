@@ -14,6 +14,7 @@
 | `dupfinder.py` | Finds duplicate files by content hash (size-grouped first, so big folders stay fast). Reports wasted space; `--move-to` quarantines the extras, nothing is ever deleted. |
 | `rename.py` | Batch-renames files with `--prefix`, repeatable `--replace OLD:NEW`, and `--numbering` (`_001`, `_002`, …). `--dry-run` previews; clashes never overwrite. |
 | `dirsize.py` | Reports the biggest folders and files in a tree with scaled bars. `--top N`, `--depth N`, `--min-size 10MB`, `--files-only` / `--dirs-only`, `--all` for hidden files. Read-only; symlinks never followed. |
+| `imgshrink.py` | Batch-resizes images with the standard library only — PNG and BMP are resized for real; JPEG/GIF/WebP are reported and skipped (they need Pillow). `--width` / `--height` / `--max` / `--scale`, `--out`, `--suffix`, `--in-place`, `--dry-run`, `--recursive`. Never overwrites by accident. |
 
 ## Usage
 
@@ -26,11 +27,14 @@ python rename.py ~/Photos --prefix vacay- --replace " :_" --numbering  # vacay-I
 python rename.py ~/Photos --dry-run --prefix vacay-  # preview first
 python dirsize.py ~/Downloads               # biggest folders & files
 python dirsize.py ~/Downloads --top 5 --min-size 10MB  # worst offenders only
+python imgshrink.py ~/Photos --max 1200      # shrink PNG/BMP copies to fit 1200px
+python imgshrink.py photo.png --width 800 --in-place  # resize the original
+python imgshrink.py ~/Photos --scale 0.5 --dry-run    # preview first
 ```
 
 ## Coming next
 
-Folder size analyzer → image resizer. Full plan: [ROADMAP.md](ROADMAP.md).
+Image resizer → text stats. Full plan: [ROADMAP.md](ROADMAP.md).
 
 ## License
 
