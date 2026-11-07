@@ -15,6 +15,7 @@
 | `rename.py` | Batch-renames files with `--prefix`, repeatable `--replace OLD:NEW`, and `--numbering` (`_001`, `_002`, …). `--dry-run` previews; clashes never overwrite. |
 | `dirsize.py` | Reports the biggest folders and files in a tree with scaled bars. `--top N`, `--depth N`, `--min-size 10MB`, `--files-only` / `--dirs-only`, `--all` for hidden files. Read-only; symlinks never followed. |
 | `imgshrink.py` | Batch-resizes images with the standard library only — PNG and BMP are resized for real; JPEG/GIF/WebP are reported and skipped (they need Pillow). `--width` / `--height` / `--max` / `--scale`, `--out`, `--suffix`, `--in-place`, `--dry-run`, `--recursive`. Never overwrites by accident. |
+| `textstats.py` | Word/line/reading-time stats for text & markdown files. Markdown-aware (code blocks, links, headings and emphasis stripped before counting), `--recursive` folder scans, `--top N` most common words, `--wpm`, `--json`, `--raw`. Read-only. |
 
 ## Usage
 
@@ -30,11 +31,14 @@ python dirsize.py ~/Downloads --top 5 --min-size 10MB  # worst offenders only
 python imgshrink.py ~/Photos --max 1200      # shrink PNG/BMP copies to fit 1200px
 python imgshrink.py photo.png --width 800 --in-place  # resize the original
 python imgshrink.py ~/Photos --scale 0.5 --dry-run    # preview first
+python textstats.py notes.md                 # words, lines, reading time, top words
+python textstats.py docs/ --recursive        # every text/markdown file in a folder
+python textstats.py a.md b.txt --json        # machine-readable output
 ```
 
 ## Coming next
 
-Image resizer → text stats. Full plan: [ROADMAP.md](ROADMAP.md).
+Text stats → unified menu launcher. Full plan: [ROADMAP.md](ROADMAP.md).
 
 ## License
 
