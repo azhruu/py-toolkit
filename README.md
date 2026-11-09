@@ -21,6 +21,7 @@
 ## Usage
 
 ```bash
+python -m unittest discover -s tests -v   # run the test suite (22 tests)
 python toolkit.py                              # interactive menu for all tools
 python toolkit.py organize ~/Downloads --dry-run  # or run a tool directly
 python organize.py ~/Downloads            # organize for real
@@ -41,7 +42,7 @@ python textstats.py a.md b.txt --json        # machine-readable output
 
 ## Coming next
 
-Text stats → unified menu launcher → unit tests. Full plan: [ROADMAP.md](ROADMAP.md).
+Unit tests → README demos with real before/after terminal output. Full plan: [ROADMAP.md](ROADMAP.md).
 
 ## License
 
