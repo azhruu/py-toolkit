@@ -10,4 +10,4 @@ Each item lands as one complete, tested change.
 - [x] textstats.py — word/line/reading-time stats for text & markdown files
 - [x] Unified `toolkit.py` menu launcher for all tools
 - [x] Unit tests (unittest) for organize + dupfinder
-- [ ] README demos with real before/after terminal output
+- [x] README demos with real before/after terminal output

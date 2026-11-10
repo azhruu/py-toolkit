@@ -40,9 +40,219 @@ python textstats.py docs/ --recursive        # every text/markdown file in a fol
 python textstats.py a.md b.txt --json        # machine-readable output
 ```
 
+<!-- demos:start -->
+
+## Demos
+
+Real terminal output from running the tools on throwaway demo folders — regenerate it any time with:
+
+```bash
+python demos/generate_demos.py   # rebuilds this section from live runs
+```
+
+### organize.py — sort a messy folder by file type
+
+Before:
+
+```
+demo-downloads/
+  backup.zip
+  beach.jpg
+  clip.mp4
+  notes.md
+  photo-copy.jpg
+  report.txt
+  script.py
+  song.mp3
+```
+
+```bash
+$ python organize.py demo-downloads --dry-run
+```
+
+```
+would move: backup.zip  ->  Archives/backup.zip
+would move: beach.jpg  ->  Images/beach.jpg
+would move: clip.mp4  ->  Video/clip.mp4
+would move: notes.md  ->  Documents/notes.md
+would move: photo-copy.jpg  ->  Images/photo-copy.jpg
+would move: report.txt  ->  Documents/report.txt
+would move: script.py  ->  Code/script.py
+would move: song.mp3  ->  Audio/song.mp3
+
+Would move 8 file(s).
+```
+
+```bash
+$ python organize.py demo-downloads
+```
+
+```
+moved: backup.zip  ->  Archives/backup.zip
+moved: beach.jpg  ->  Images/beach.jpg
+moved: clip.mp4  ->  Video/clip.mp4
+moved: notes.md  ->  Documents/notes.md
+moved: photo-copy.jpg  ->  Images/photo-copy.jpg
+moved: report.txt  ->  Documents/report.txt
+moved: script.py  ->  Code/script.py
+moved: song.mp3  ->  Audio/song.mp3
+
+Moved 8 file(s).
+```
+
+```
+After:
+demo-downloads/
+  Archives/
+    backup.zip
+  Audio/
+    song.mp3
+  Code/
+    script.py
+  Documents/
+    notes.md
+    report.txt
+  Images/
+    beach.jpg
+    photo-copy.jpg
+  Video/
+    clip.mp4
+```
+
+### dupfinder.py — find duplicates by content hash
+
+`beach.jpg` and `photo-copy.jpg` are byte-identical:
+
+```bash
+$ python dupfinder.py demo-downloads
+```
+
+```
+
+Group 1 (2 copies, 8 B each):
+  [keep] demo-downloads/Images/beach.jpg
+  [dup ] demo-downloads/Images/photo-copy.jpg
+
+Found 1 duplicate group(s), 1 extra file(s), 8 B wasted.
+```
+
+```bash
+$ python dupfinder.py demo-downloads --move-to dupes
+```
+
+```
+
+Group 1 (2 copies, 8 B each):
+  [keep] demo-downloads/Images/beach.jpg
+  [dup ] demo-downloads/Images/photo-copy.jpg
+
+Found 1 duplicate group(s), 1 extra file(s), 8 B wasted.
+moved: demo-downloads/Images/photo-copy.jpg  ->  dupes/photo-copy.jpg
+Moved 1 duplicate file(s) to dupes.
+```
+
+```
+dupes/
+  photo-copy.jpg
+```
+
+### rename.py — batch rename with prefix and numbering
+
+```bash
+$ python rename.py photos --prefix vacay- --numbering --dry-run
+```
+
+```
+would rename: IMG_20240101.jpg  ->  vacay-IMG_20240101_001.jpg
+would rename: IMG_20240102.jpg  ->  vacay-IMG_20240102_002.jpg
+would rename: IMG_20240103.jpg  ->  vacay-IMG_20240103_003.jpg
+
+Would rename 3 file(s).
+```
+
+```bash
+$ python rename.py photos --prefix vacay- --numbering
+```
+
+```
+renamed: IMG_20240101.jpg  ->  vacay-IMG_20240101_001.jpg
+renamed: IMG_20240102.jpg  ->  vacay-IMG_20240102_002.jpg
+renamed: IMG_20240103.jpg  ->  vacay-IMG_20240103_003.jpg
+
+Renamed 3 file(s).
+```
+
+```
+photos/
+  vacay-IMG_20240101_001.jpg
+  vacay-IMG_20240102_002.jpg
+  vacay-IMG_20240103_003.jpg
+```
+
+### dirsize.py — biggest folders and files in a tree
+
+```bash
+$ python dirsize.py sizes --top 5
+```
+
+```
+sizes
+Total: 3.3 MB  (4 file(s), 3 folder(s))
+
+Biggest files (top 4):
+      2.4 MB  |##############################|  media/movie.mp4
+    781.2 KB  |##########--------------------|  docs/archive.zip
+    117.2 KB  |#-----------------------------|  media/photo.jpg
+      2.9 KB  |------------------------------|  docs/notes.txt
+
+Biggest folders (top 2, depth 2):
+      2.5 MB  |##############################|  media
+    784.2 KB  |#########---------------------|  docs
+```
+
+### textstats.py — word, line and reading-time stats
+
+```bash
+$ python textstats.py trip.md
+```
+
+```
+trip.md
+  Lines: 6   Words: 24   Characters: 124 (96 without spaces)
+  Sentences: 3   Paragraphs: 3   Reading time: 7 sec (@ 200 wpm)
+  Longest word: notes
+  Top words: quick (2), fox (2), lazy (2), dog (2), pack (2)
+```
+
+### imgshrink.py — batch-resize images (stdlib only)
+
+An 800×600 PNG, shrunk to fit inside 200×200:
+
+```bash
+$ python imgshrink.py big.png --max 200 --dry-run
+```
+
+```
+would resize: big.png 800x600 -> 200x150
+
+Would resize 1 file(s), skipped 0, 0 error(s).
+```
+
+```bash
+$ python imgshrink.py big.png --max 200
+```
+
+```
+big.png 800x600 -> 200x150 (2.3 KB -> 345 B) -> big-small.png
+
+Resized 1 file(s), skipped 0, 0 error(s).
+```
+
+<!-- demos:end -->
+
 ## Coming next
 
-Unit tests → README demos with real before/after terminal output. Full plan: [ROADMAP.md](ROADMAP.md).
+Every roadmap item is done — see [ROADMAP.md](ROADMAP.md). The demos above are regenerated from live runs with `python demos/generate_demos.py`.
 
 ## License
 
