@@ -21,9 +21,12 @@ Direct mode (arguments are passed straight through to the tool):
     python toolkit.py --list            # show the menu and exit
     python toolkit.py organize --help   # that tool's own --help
 
+A mistyped tool name gets a "did you mean …?" hint instead of a bare error.
+
 The launcher never changes what a tool does: it just finds the script
 next to itself and runs it with your Python, forwarding its exit code.
 """
+import difflib
 import subprocess
 import sys
 from pathlib import Path
@@ -94,6 +97,13 @@ def resolve(name: str) -> str | None:
     return name if name in TOOLS else None
 
 
+def suggest(name: str) -> str | None:
+    """Closest real tool name to a mistyped one, or None if nothing is close."""
+    matches = difflib.get_close_matches(
+        name.lower().removesuffix(".py"), TOOLS, n=1, cutoff=0.6)
+    return matches[0] if matches else None
+
+
 def run_tool(name: str, args: list[str]) -> int:
     script = HERE / TOOLS[name][0]
     if not script.is_file():
@@ -149,7 +159,12 @@ def interactive() -> int:
         if key is None and choice.isdigit() and 1 <= int(choice) <= len(names):
             key = names[int(choice) - 1]
         if key is None:
-            print(f"no tool called {choice!r} — pick a number 1–{len(names)} or a name.\n")
+            hint = suggest(choice)
+            msg = f"no tool called {choice!r}"
+            if hint:
+                msg += f" — did you mean {hint!r}?"
+            msg += f" Pick a number 1–{len(names)} or a name.\n"
+            print(msg)
             continue
         args = build_args(key)
         if args is None:
@@ -177,6 +192,9 @@ def main(argv: list[str]) -> int:
     key = resolve(argv[0])
     if key is None:
         print(f"error: no tool called {argv[0]!r}", file=sys.stderr)
+        hint = suggest(argv[0])
+        if hint:
+            print(f"did you mean {hint!r}?", file=sys.stderr)
         print("Run `python toolkit.py --list` to see the tools.", file=sys.stderr)
         return 2
     return run_tool(key, argv[1:])

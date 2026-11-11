@@ -15,13 +15,13 @@
 | `rename.py` | Batch-renames files with `--prefix`, repeatable `--replace OLD:NEW`, and `--numbering` (`_001`, `_002`, …). `--dry-run` previews; clashes never overwrite. |
 | `dirsize.py` | Reports the biggest folders and files in a tree with scaled bars. `--top N`, `--depth N`, `--min-size 10MB`, `--files-only` / `--dirs-only`, `--all` for hidden files. Read-only; symlinks never followed. |
 | `imgshrink.py` | Batch-resizes images with the standard library only — PNG and BMP are resized for real; JPEG/GIF/WebP are reported and skipped (they need Pillow). `--width` / `--height` / `--max` / `--scale`, `--out`, `--suffix`, `--in-place`, `--dry-run`, `--recursive`. Never overwrites by accident. |
-| `toolkit.py` | One front door for all six tools: run it with no arguments for an interactive menu, or `toolkit.py <tool> [args]` to run a tool directly (args pass straight through). |
+| `toolkit.py` | One front door for all six tools: run it with no arguments for an interactive menu, or `toolkit.py <tool> [args]` to run a tool directly (args pass straight through). A mistyped tool name gets a “did you mean …?” hint. |
 | `textstats.py` | Word/line/reading-time stats for text & markdown files. Markdown-aware (code blocks, links, headings and emphasis stripped before counting), `--recursive` folder scans, `--top N` most common words, `--wpm`, `--json`, `--raw`. Read-only. |
 
 ## Usage
 
 ```bash
-python -m unittest discover -s tests -v   # run the test suite (22 tests)
+python -m unittest discover -s tests -v   # run the test suite (30 tests)
 python toolkit.py                              # interactive menu for all tools
 python toolkit.py organize ~/Downloads --dry-run  # or run a tool directly
 python organize.py ~/Downloads            # organize for real
