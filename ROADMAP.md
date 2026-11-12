@@ -12,3 +12,7 @@ Each item lands as one complete, tested change.
 - [x] Unit tests (unittest) for organize + dupfinder
 - [x] README demos with real before/after terminal output
 - [x] Launcher "did you mean?" hint for mistyped tool names (+ tests)
+
+## Polish (after the roadmap above)
+
+- [x] `toolkit.py --version` / `-V` flag (+ tests)

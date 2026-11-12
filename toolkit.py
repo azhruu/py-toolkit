@@ -19,6 +19,7 @@ Direct mode (arguments are passed straight through to the tool):
     python toolkit.py textstats notes.md --json
 
     python toolkit.py --list            # show the menu and exit
+    python toolkit.py --version         # show the toolkit version and exit
     python toolkit.py organize --help   # that tool's own --help
 
 A mistyped tool name gets a "did you mean …?" hint instead of a bare error.
@@ -32,6 +33,8 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+
+__version__ = "1.1.0"
 
 # name -> (script, one-line description)
 TOOLS = {
@@ -181,6 +184,9 @@ def interactive() -> int:
 def main(argv: list[str]) -> int:
     if not argv:
         return interactive()
+    if argv[0] in ("--version", "-V"):
+        print(f"py-toolkit {__version__}")
+        return 0
     if argv[0] in ("--list", "list"):
         show_menu()
         return 0

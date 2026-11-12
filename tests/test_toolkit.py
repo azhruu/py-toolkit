@@ -60,5 +60,24 @@ class TestMain(unittest.TestCase):
         self.assertNotIn("did you mean", err.getvalue())
 
 
+class TestVersion(unittest.TestCase):
+    def test_version_flag(self):
+        out = io.StringIO()
+        with redirect_stdout(out):
+            self.assertEqual(toolkit.main(["--version"]), 0)
+        self.assertEqual(out.getvalue().strip(), f"py-toolkit {toolkit.__version__}")
+
+    def test_version_short_flag(self):
+        out = io.StringIO()
+        with redirect_stdout(out):
+            self.assertEqual(toolkit.main(["-V"]), 0)
+        self.assertIn(toolkit.__version__, out.getvalue())
+
+    def test_version_looks_like_semver(self):
+        parts = toolkit.__version__.split(".")
+        self.assertEqual(len(parts), 3)
+        self.assertTrue(all(p.isdigit() for p in parts))
+
+
 if __name__ == "__main__":
     unittest.main()
