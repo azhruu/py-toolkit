@@ -21,7 +21,7 @@
 ## Usage
 
 ```bash
-python -m unittest discover -s tests -v   # run the test suite (33 tests)
+python -m unittest discover -s tests -v   # run the test suite (56 tests)
 python toolkit.py                              # interactive menu for all tools
 python toolkit.py --version                      # show the toolkit version
 python toolkit.py organize ~/Downloads --dry-run  # or run a tool directly
