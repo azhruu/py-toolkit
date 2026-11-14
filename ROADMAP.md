@@ -17,3 +17,4 @@ Each item lands as one complete, tested change.
 
 - [x] `toolkit.py --version` / `-V` flag (+ tests)
 - [x] Unit tests (unittest) for rename.py — patterns, numbering, dry-run, clash safety
+- [x] Unit tests (unittest) for dirsize.py — size formatting/parsing, bars, tree walk (hidden files, symlinks), report filtering
