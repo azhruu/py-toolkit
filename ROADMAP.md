@@ -19,3 +19,4 @@ Each item lands as one complete, tested change.
 - [x] Unit tests (unittest) for rename.py — patterns, numbering, dry-run, clash safety
 - [x] Unit tests (unittest) for dirsize.py — size formatting/parsing, bars, tree walk (hidden files, symlinks), report filtering
 - [x] Unit tests (unittest) for textstats.py — markdown stripping, sentence/paragraph counts, reading time, top words, per-file stats, totals, file collection
+- [x] Unit tests (unittest) for imgshrink.py — sizing, resampling, PNG/BMP round-trips (incl. filters, palette, 16-bit, top-down BMP), format detection, clash safety, dry-run/in-place
