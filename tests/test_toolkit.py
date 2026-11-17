@@ -10,6 +10,7 @@ import sys
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -58,6 +59,27 @@ class TestMain(unittest.TestCase):
         with redirect_stderr(err):
             self.assertEqual(toolkit.main(["xyzzy"]), 2)
         self.assertNotIn("did you mean", err.getvalue())
+
+
+class TestBuildArgs(unittest.TestCase):
+    def test_blank_positional_cancels_to_menu(self):
+        with mock.patch.object(toolkit, "ask", return_value=""):
+            out = io.StringIO()
+            with redirect_stdout(out):
+                self.assertIsNone(toolkit.build_args("organize"))
+            self.assertIn("cancelled", out.getvalue())
+
+    def test_positional_and_yes_no_flags(self):
+        answers = iter(["/tmp/downloads", "y"])
+        with mock.patch.object(toolkit, "ask", side_effect=lambda *a: next(answers)):
+            self.assertEqual(toolkit.build_args("organize"),
+                             ["/tmp/downloads", "--dry-run"])
+
+    def test_blank_optional_flags_are_skipped(self):
+        answers = iter(["notes.md", "n", "y"])
+        with mock.patch.object(toolkit, "ask", side_effect=lambda *a: next(answers)):
+            self.assertEqual(toolkit.build_args("textstats"),
+                             ["notes.md", "--json"])
 
 
 class TestVersion(unittest.TestCase):

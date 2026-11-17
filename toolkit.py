@@ -7,7 +7,9 @@ Interactive menu (no arguments):
 
 Pick a tool by number, answer a few prompts, and it runs — with the
 same flags the standalone script takes. After a tool finishes you can
-run another one or quit (`q` / `0`).
+run another one or quit (`q` / `0`). Leaving a required folder or file
+blank cancels that tool and takes you back to the menu, instead of
+running it with no arguments.
 
 Direct mode (arguments are passed straight through to the tool):
 
@@ -34,7 +36,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 # name -> (script, one-line description)
 TOOLS = {
@@ -129,10 +131,18 @@ def ask(prompt: str, default: str = "") -> str:
 
 
 def build_args(name: str) -> list[str] | None:
-    """Prompt for a tool's arguments; None means the user bailed out."""
+    """Prompt for a tool's arguments; None means the user bailed out.
+
+    A blank answer to a required positional (folder/file) cancels back
+    to the menu instead of running the tool with no arguments; blank
+    answers to optional flags just skip that flag.
+    """
     args: list[str] = []
     for question, flag, default in PROMPTS[name]:
         answer = ask(question, default)
+        if flag is None and not answer:
+            print("(cancelled — back to the menu)\n")
+            return None
         if not answer:
             continue
         if flag is None:
