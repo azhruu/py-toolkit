@@ -48,6 +48,23 @@ class TestMain(unittest.TestCase):
             self.assertEqual(toolkit.main(["--list"]), 0)
         self.assertIn("organize", out.getvalue())
 
+    def test_menu_number_runs_that_tool(self):
+        with mock.patch.object(toolkit, "run_tool", return_value=0) as run:
+            self.assertEqual(toolkit.main(["1", "~/Downloads", "--dry-run"]), 0)
+        run.assert_called_once_with("organize", ["~/Downloads", "--dry-run"])
+
+    def test_menu_number_last_tool(self):
+        with mock.patch.object(toolkit, "run_tool", return_value=0) as run:
+            self.assertEqual(toolkit.main(["6", "notes.md"]), 0)
+        run.assert_called_once_with("textstats", ["notes.md"])
+
+    def test_menu_number_out_of_range_exits_two(self):
+        err = io.StringIO()
+        with redirect_stderr(err):
+            self.assertEqual(toolkit.main(["0"]), 2)
+        with redirect_stderr(io.StringIO()):
+            self.assertEqual(toolkit.main(["7"]), 2)
+
     def test_unknown_tool_exits_two_with_hint(self):
         err = io.StringIO()
         with redirect_stderr(err):

@@ -14,6 +14,7 @@ running it with no arguments.
 Direct mode (arguments are passed straight through to the tool):
 
     python toolkit.py organize ~/Downloads --dry-run
+    python toolkit.py 1 ~/Downloads --dry-run   # same tool, by menu number
     python toolkit.py dupfinder ~/Downloads --min-size 1024
     python toolkit.py rename ~/Photos --prefix vacay- --numbering
     python toolkit.py dirsize ~/Downloads --top 5
@@ -206,6 +207,12 @@ def main(argv: list[str]) -> int:
         print("Interactive: toolkit.py")
         return 0
     key = resolve(argv[0])
+    if key is None and argv[0].isdigit():
+        # Direct mode accepts a menu number too, so `toolkit.py 1 …` runs
+        # the same tool as picking 1 in the interactive menu.
+        names = list(TOOLS)
+        if 1 <= int(argv[0]) <= len(names):
+            key = names[int(argv[0]) - 1]
     if key is None:
         print(f"error: no tool called {argv[0]!r}", file=sys.stderr)
         hint = suggest(argv[0])
