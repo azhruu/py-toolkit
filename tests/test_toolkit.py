@@ -93,10 +93,16 @@ class TestBuildArgs(unittest.TestCase):
                              ["/tmp/downloads", "--dry-run"])
 
     def test_blank_optional_flags_are_skipped(self):
-        answers = iter(["notes.md", "n", "y"])
+        answers = iter(["notes.md", "", "n", "y"])
         with mock.patch.object(toolkit, "ask", side_effect=lambda *a: next(answers)):
             self.assertEqual(toolkit.build_args("textstats"),
                              ["notes.md", "--json"])
+
+    def test_top_words_prompt_passed_through(self):
+        answers = iter(["notes.md", "10", "n", "n"])
+        with mock.patch.object(toolkit, "ask", side_effect=lambda *a: next(answers)):
+            self.assertEqual(toolkit.build_args("textstats"),
+                             ["notes.md", "--top", "10"])
 
 
 class TestVersion(unittest.TestCase):

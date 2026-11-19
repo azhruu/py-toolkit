@@ -37,7 +37,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 
 # name -> (script, one-line description)
 TOOLS = {
@@ -84,6 +84,7 @@ PROMPTS = {
     ],
     "textstats": [
         ("File(s) or folder, space-separated", None, ""),
+        ("How many top words to show (blank = 5)", "--top", ""),
         ("Scan subfolders too? [y/N]", "--recursive", "n"),
         ("Machine-readable JSON output? [y/N]", "--json", "n"),
     ],
