@@ -6,10 +6,11 @@ Interactive menu (no arguments):
     python toolkit.py
 
 Pick a tool by number, answer a few prompts, and it runs — with the
-same flags the standalone script takes. After a tool finishes you can
-run another one or quit (`q` / `0`). Leaving a required folder or file
-blank cancels that tool and takes you back to the menu, instead of
-running it with no arguments.
+same flags the standalone script takes. Paths with spaces can be
+quoted in a prompt ("My Photos") so they stay one argument. After a
+tool finishes you can run another one or quit (`q` / `0`). Leaving a
+required folder or file blank cancels that tool and takes you back to
+the menu, instead of running it with no arguments.
 
 Direct mode (arguments are passed straight through to the tool):
 
@@ -31,13 +32,14 @@ The launcher never changes what a tool does: it just finds the script
 next to itself and runs it with your Python, forwarding its exit code.
 """
 import difflib
+import shlex
 import subprocess
 import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 
-__version__ = "1.3.0"
+__version__ = "1.3.1"
 
 # name -> (script, one-line description)
 TOOLS = {
@@ -132,6 +134,16 @@ def ask(prompt: str, default: str = "") -> str:
     return answer or default
 
 
+def split_positional(answer: str) -> list[str]:
+    """Split a positional answer into arguments, honouring quotes so a
+    path with spaces ("My Photos") stays one argument. An unbalanced
+    quote falls back to a plain split instead of erroring."""
+    try:
+        return shlex.split(answer)
+    except ValueError:
+        return answer.split()
+
+
 def build_args(name: str) -> list[str] | None:
     """Prompt for a tool's arguments; None means the user bailed out.
 
@@ -148,7 +160,7 @@ def build_args(name: str) -> list[str] | None:
         if not answer:
             continue
         if flag is None:
-            args.extend(answer.split())
+            args.extend(split_positional(answer))
         elif flag in ("--dry-run", "--numbering", "--recursive", "--json"):
             if answer.lower().startswith("y"):
                 args.append(flag)

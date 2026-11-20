@@ -23,3 +23,4 @@ Each item lands as one complete, tested change.
 - [x] Interactive menu: a blank answer to a required folder/file prompt cancels back to the menu instead of running the tool with no arguments (+ tests)
 - [x] Interactive menu asks textstats how many top words to show — blank keeps the default 5, a number passes `--top N` through (+ tests)
 - [x] Direct mode accepts a tool's menu number — `toolkit.py 1 …` runs the same tool as picking 1 in the interactive menu (+ tests)
+- [x] Interactive prompts accept quoted paths with spaces — `"My Photos"` stays one argument instead of splitting on the space, with a plain-split fallback for unbalanced quotes (+ tests)

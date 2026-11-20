@@ -78,6 +78,22 @@ class TestMain(unittest.TestCase):
         self.assertNotIn("did you mean", err.getvalue())
 
 
+class TestSplitPositional(unittest.TestCase):
+    def test_plain_words_split(self):
+        self.assertEqual(toolkit.split_positional("a.md b.txt"),
+                         ["a.md", "b.txt"])
+
+    def test_quoted_path_with_spaces_stays_one_arg(self):
+        self.assertEqual(toolkit.split_positional('"My Photos"'),
+                         ["My Photos"])
+        self.assertEqual(toolkit.split_positional("'My Photos' notes.md"),
+                         ["My Photos", "notes.md"])
+
+    def test_unbalanced_quote_falls_back_to_plain_split(self):
+        self.assertEqual(toolkit.split_positional("o'clock folder"),
+                         ["o'clock", "folder"])
+
+
 class TestBuildArgs(unittest.TestCase):
     def test_blank_positional_cancels_to_menu(self):
         with mock.patch.object(toolkit, "ask", return_value=""):
@@ -103,6 +119,18 @@ class TestBuildArgs(unittest.TestCase):
         with mock.patch.object(toolkit, "ask", side_effect=lambda *a: next(answers)):
             self.assertEqual(toolkit.build_args("textstats"),
                              ["notes.md", "--top", "10"])
+
+    def test_quoted_folder_with_spaces_stays_one_arg(self):
+        answers = iter(['"My Downloads"', "n"])
+        with mock.patch.object(toolkit, "ask", side_effect=lambda *a: next(answers)):
+            self.assertEqual(toolkit.build_args("organize"),
+                             ["My Downloads"])
+
+    def test_multiple_files_still_split(self):
+        answers = iter(["a.md b.txt", "", "n", "n"])
+        with mock.patch.object(toolkit, "ask", side_effect=lambda *a: next(answers)):
+            self.assertEqual(toolkit.build_args("textstats"),
+                             ["a.md", "b.txt"])
 
 
 class TestVersion(unittest.TestCase):
