@@ -8,7 +8,8 @@ Interactive menu (no arguments):
 Pick a tool by number, answer a few prompts, and it runs — with the
 same flags the standalone script takes. Paths with spaces can be
 quoted in a prompt ("My Photos") so they stay one argument. After a
-tool finishes you can run another one or quit (`q` / `0`). Leaving a
+tool finishes you can run another one or quit (`q` / `0`, or just
+press Enter at the menu). Leaving a
 required folder or file blank cancels that tool and takes you back to
 the menu, instead of running it with no arguments.
 
@@ -39,7 +40,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 
-__version__ = "1.3.1"
+__version__ = "1.3.2"
 
 # name -> (script, one-line description)
 TOOLS = {
@@ -179,7 +180,7 @@ def interactive() -> int:
     while True:
         show_menu()
         choice = ask("Tool number or name (0/q to quit)").lower()
-        if choice in ("0", "q", "quit", "exit"):
+        if choice in ("", "0", "q", "quit", "exit"):
             print("Bye!")
             return 0
         key = resolve(choice)

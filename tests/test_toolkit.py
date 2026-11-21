@@ -133,6 +133,54 @@ class TestBuildArgs(unittest.TestCase):
                              ["a.md", "b.txt"])
 
 
+class TestInteractive(unittest.TestCase):
+    def test_blank_choice_quits_cleanly(self):
+        with mock.patch.object(toolkit, "ask", return_value=""):
+            out = io.StringIO()
+            with redirect_stdout(out):
+                self.assertEqual(toolkit.interactive(), 0)
+        self.assertIn("Bye!", out.getvalue())
+        self.assertNotIn("no tool called", out.getvalue())
+
+    def test_q_quits(self):
+        with mock.patch.object(toolkit, "ask", return_value="q"):
+            out = io.StringIO()
+            with redirect_stdout(out):
+                self.assertEqual(toolkit.interactive(), 0)
+        self.assertIn("Bye!", out.getvalue())
+
+    def test_unknown_choice_then_quit(self):
+        answers = iter(["xyzzy", "q"])
+        with mock.patch.object(toolkit, "ask",
+                               side_effect=lambda *a: next(answers)):
+            out = io.StringIO()
+            with redirect_stdout(out):
+                self.assertEqual(toolkit.interactive(), 0)
+        self.assertIn("no tool called 'xyzzy'", out.getvalue())
+        self.assertIn("Bye!", out.getvalue())
+
+    def test_run_tool_then_quit(self):
+        answers = iter(["organize", "/tmp", "n", "n"])
+        with mock.patch.object(toolkit, "ask",
+                               side_effect=lambda *a: next(answers)), \
+             mock.patch.object(toolkit, "run_tool", return_value=0) as run:
+            out = io.StringIO()
+            with redirect_stdout(out):
+                self.assertEqual(toolkit.interactive(), 0)
+        run.assert_called_once_with("organize", ["/tmp"])
+        self.assertIn("finished, exit code 0", out.getvalue())
+
+    def test_cancelled_tool_returns_to_menu_then_quit(self):
+        answers = iter(["organize", "", "q"])
+        with mock.patch.object(toolkit, "ask",
+                               side_effect=lambda *a: next(answers)):
+            out = io.StringIO()
+            with redirect_stdout(out):
+                self.assertEqual(toolkit.interactive(), 0)
+        self.assertIn("cancelled", out.getvalue())
+        self.assertIn("Bye!", out.getvalue())
+
+
 class TestVersion(unittest.TestCase):
     def test_version_flag(self):
         out = io.StringIO()
