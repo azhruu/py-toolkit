@@ -25,3 +25,4 @@ Each item lands as one complete, tested change.
 - [x] Direct mode accepts a tool's menu number — `toolkit.py 1 …` runs the same tool as picking 1 in the interactive menu (+ tests)
 - [x] Interactive menu: a blank answer at the tool prompt quits cleanly instead of printing "no tool called ''" (+ tests)
 - [x] Interactive prompts accept quoted paths with spaces — `"My Photos"` stays one argument instead of splitting on the space, with a plain-split fallback for unbalanced quotes (+ tests)
+- [x] organize.py `--recursive` — tidy nested folders too, into the same top-level category folders; hidden files/folders skipped, files already in a category folder left alone, name clashes get a suffix (+ tests, launcher prompt)

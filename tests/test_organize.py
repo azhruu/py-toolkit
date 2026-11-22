@@ -109,5 +109,57 @@ class TestOrganize(unittest.TestCase):
         self.assertEqual(organize(self.folder / "no-such-folder"), 1)
 
 
+class TestOrganizeRecursive(unittest.TestCase):
+    def setUp(self):
+        import tempfile
+        self._tmp = tempfile.TemporaryDirectory()
+        self.folder = Path(self._tmp.name)
+        (self.folder / "sub").mkdir()
+        (self.folder / "sub" / "deep").mkdir()
+        (self.folder / "sub" / "photo.jpg").write_bytes(b"img")
+        (self.folder / "sub" / "deep" / "notes.txt").write_bytes(b"hi")
+        (self.folder / "top.mp3").write_bytes(b"au")
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def test_recursive_moves_nested_files_to_top_level_categories(self):
+        self.assertEqual(organize(self.folder, recursive=True), 0)
+        self.assertTrue((self.folder / "Images" / "photo.jpg").exists())
+        self.assertTrue((self.folder / "Documents" / "notes.txt").exists())
+        self.assertTrue((self.folder / "Audio" / "top.mp3").exists())
+        self.assertFalse((self.folder / "sub" / "photo.jpg").exists())
+        self.assertFalse((self.folder / "sub" / "deep" / "notes.txt").exists())
+
+    def test_recursive_dry_run_moves_nothing(self):
+        self.assertEqual(organize(self.folder, dry_run=True, recursive=True), 0)
+        self.assertTrue((self.folder / "sub" / "photo.jpg").exists())
+        self.assertFalse((self.folder / "Images").exists())
+
+    def test_files_already_in_a_category_folder_are_left_alone(self):
+        images = self.folder / "Images"
+        images.mkdir()
+        (images / "old.jpg").write_bytes(b"old")
+        self.assertEqual(organize(self.folder, recursive=True), 0)
+        self.assertTrue((images / "old.jpg").exists())
+
+    def test_hidden_nested_files_and_folders_are_skipped(self):
+        (self.folder / "sub" / ".secret.txt").write_bytes(b"s")
+        hidden = self.folder / ".cache"
+        hidden.mkdir()
+        (hidden / "cached.jpg").write_bytes(b"c")
+        self.assertEqual(organize(self.folder, recursive=True), 0)
+        self.assertTrue((self.folder / "sub" / ".secret.txt").exists())
+        self.assertTrue((hidden / "cached.jpg").exists())
+
+    def test_same_name_in_two_subfolders_gets_a_suffix(self):
+        (self.folder / "other").mkdir()
+        (self.folder / "other" / "photo.jpg").write_bytes(b"img2")
+        self.assertEqual(organize(self.folder, recursive=True), 0)
+        # "other" sorts before "sub", so its photo.jpg takes the plain name.
+        self.assertEqual((self.folder / "Images" / "photo.jpg").read_bytes(), b"img2")
+        self.assertEqual((self.folder / "Images" / "photo (1).jpg").read_bytes(), b"img")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -10,7 +10,7 @@
 
 | Tool | What it does |
 |---|---|
-| `organize.py` | Sorts a messy folder into subfolders by file type (Images, Documents, Audio, Video, Archives, Code, Other). `--dry-run` previews safely; name clashes never overwrite. |
+| `organize.py` | Sorts a messy folder into subfolders by file type (Images, Documents, Audio, Video, Archives, Code, Other). `--dry-run` previews safely; `--recursive` tidies nested folders too, into the same top-level category folders. Name clashes never overwrite. |
 | `dupfinder.py` | Finds duplicate files by content hash (size-grouped first, so big folders stay fast). Reports wasted space; `--move-to` quarantines the extras, nothing is ever deleted. |
 | `rename.py` | Batch-renames files with `--prefix`, repeatable `--replace OLD:NEW`, and `--numbering` (`_001`, `_002`, …). `--dry-run` previews; clashes never overwrite. |
 | `dirsize.py` | Reports the biggest folders and files in a tree with scaled bars. `--top N`, `--depth N`, `--min-size 10MB`, `--files-only` / `--dirs-only`, `--all` for hidden files. Read-only; symlinks never followed. |
@@ -21,13 +21,14 @@
 ## Usage
 
 ```bash
-python -m unittest discover -s tests -v   # run the test suite (191 tests)
+python -m unittest discover -s tests -v   # run the test suite (197 tests)
 python toolkit.py                              # interactive menu for all tools
 python toolkit.py --version                      # show the toolkit version
 python toolkit.py organize ~/Downloads --dry-run  # or run a tool directly
 python toolkit.py 1 ~/Downloads --dry-run         # same tool, by menu number
 python organize.py ~/Downloads            # organize for real
 python organize.py ~/Downloads --dry-run  # preview first
+python organize.py ~/Downloads --recursive  # tidy nested folders too
 python dupfinder.py ~/Downloads           # find duplicates by content hash
 python dupfinder.py ~/Downloads --move-to ~/dupes  # quarantine the extras
 python rename.py ~/Photos --prefix vacay- --replace " :_" --numbering  # vacay-IMG_001_01.jpg …

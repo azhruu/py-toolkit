@@ -17,6 +17,7 @@ Direct mode (arguments are passed straight through to the tool):
 
     python toolkit.py organize ~/Downloads --dry-run
     python toolkit.py 1 ~/Downloads --dry-run   # same tool, by menu number
+    python toolkit.py organize ~/Downloads --recursive
     python toolkit.py dupfinder ~/Downloads --min-size 1024
     python toolkit.py rename ~/Photos --prefix vacay- --numbering
     python toolkit.py dirsize ~/Downloads --top 5
@@ -40,7 +41,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 
-__version__ = "1.3.2"
+__version__ = "1.3.3"
 
 # name -> (script, one-line description)
 TOOLS = {
@@ -59,6 +60,7 @@ PROMPTS = {
     "organize": [
         ("Folder to organize", None, ""),
         ("Preview only, move nothing? [y/N]", "--dry-run", "n"),
+        ("Organize subfolders too? [y/N]", "--recursive", "n"),
     ],
     "dupfinder": [
         ("Folder to scan (recursively)", None, ""),
