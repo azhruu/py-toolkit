@@ -26,3 +26,4 @@ Each item lands as one complete, tested change.
 - [x] Interactive menu: a blank answer at the tool prompt quits cleanly instead of printing "no tool called ''" (+ tests)
 - [x] Interactive prompts accept quoted paths with spaces — `"My Photos"` stays one argument instead of splitting on the space, with a plain-split fallback for unbalanced quotes (+ tests)
 - [x] organize.py `--recursive` — tidy nested folders too, into the same top-level category folders; hidden files/folders skipped, files already in a category folder left alone, name clashes get a suffix (+ tests, launcher prompt)
+- [x] dupfinder.py `--min-size` takes human sizes — `10KB` / `1.5MB` like dirsize.py (same parsing, so the tools agree), plain bytes still work, bad sizes fail with a clear error (+ tests, launcher prompt)

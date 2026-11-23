@@ -2,7 +2,11 @@
 """dupfinder.py — find duplicate files by content hash.
 
 Usage:
-    python dupfinder.py <folder> [--min-size BYTES] [--move-to <folder>]
+    python dupfinder.py <folder> [--min-size SIZE] [--move-to <folder>]
+
+--min-size takes a plain byte count or a human size like 10KB / 1.5MB
+(the same parsing dirsize.py uses), so `--min-size 10MB` ignores
+anything smaller than ten megabytes.
 
 How it works: files are first grouped by size (cheap), then only
 same-size files are hashed (SHA-256, read in chunks), so big folders
@@ -20,6 +24,31 @@ import sys
 from pathlib import Path
 
 CHUNK = 1024 * 1024
+
+SIZE_SUFFIXES = {"b": 1, "k": 1024, "kb": 1024, "m": 1024 ** 2,
+                 "mb": 1024 ** 2, "g": 1024 ** 3, "gb": 1024 ** 3,
+                 "t": 1024 ** 4, "tb": 1024 ** 4}
+
+
+def parse_size(text: str) -> int:
+    """Parse '10MB', '500K', '1024' into bytes; raises ValueError.
+
+    Same parsing as dirsize.py, so the two tools agree on what a
+    human size means: an optional decimal number plus an optional
+    unit suffix (B/KB/MB/GB/TB, case-insensitive, 'K' == 'KB')."""
+    raw = text.strip().lower()
+    digits = ""
+    for ch in raw:
+        if ch.isdigit() or ch == ".":
+            digits += ch
+        else:
+            break
+    suffix = raw[len(digits):].strip()
+    if not digits:
+        raise ValueError(f"bad size {text!r}: expected a number")
+    if suffix and suffix not in SIZE_SUFFIXES:
+        raise ValueError(f"bad size {text!r}: unknown suffix {suffix!r}")
+    return int(float(digits) * SIZE_SUFFIXES.get(suffix, 1))
 
 
 def sha256_of(path: Path) -> str:
@@ -69,8 +98,8 @@ def human(n: int) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Find duplicate files by content hash.")
     parser.add_argument("folder", help="folder to scan (recursively)")
-    parser.add_argument("--min-size", type=int, default=1,
-                        help="ignore files smaller than this many bytes (default: 1)")
+    parser.add_argument("--min-size", default="1",
+                        help="ignore files smaller than this, e.g. 10MB (default: 1 byte)")
     parser.add_argument("--move-to", metavar="FOLDER",
                         help="move duplicate extras here instead of just listing them")
     args = parser.parse_args()
@@ -79,8 +108,12 @@ def main() -> int:
     if not folder.is_dir():
         print(f"error: {folder} is not a folder", file=sys.stderr)
         return 1
+    try:
+        min_size = parse_size(args.min_size)
+    except ValueError as exc:
+        parser.error(str(exc))
 
-    groups = find_duplicates(folder, args.min_size)
+    groups = find_duplicates(folder, min_size)
     extras = sum(len(g) - 1 for g in groups)
     wasted = sum(g[0].stat().st_size * (len(g) - 1) for g in groups)
 

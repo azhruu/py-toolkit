@@ -11,7 +11,7 @@
 | Tool | What it does |
 |---|---|
 | `organize.py` | Sorts a messy folder into subfolders by file type (Images, Documents, Audio, Video, Archives, Code, Other). `--dry-run` previews safely; `--recursive` tidies nested folders too, into the same top-level category folders. Name clashes never overwrite. |
-| `dupfinder.py` | Finds duplicate files by content hash (size-grouped first, so big folders stay fast). Reports wasted space; `--move-to` quarantines the extras, nothing is ever deleted. |
+| `dupfinder.py` | Finds duplicate files by content hash (size-grouped first, so big folders stay fast). Reports wasted space; `--move-to` quarantines the extras, nothing is ever deleted; `--min-size 10MB` ignores smaller files. |
 | `rename.py` | Batch-renames files with `--prefix`, repeatable `--replace OLD:NEW`, and `--numbering` (`_001`, `_002`, …). `--dry-run` previews; clashes never overwrite. |
 | `dirsize.py` | Reports the biggest folders and files in a tree with scaled bars. `--top N`, `--depth N`, `--min-size 10MB`, `--files-only` / `--dirs-only`, `--all` for hidden files. Read-only; symlinks never followed. |
 | `imgshrink.py` | Batch-resizes images with the standard library only — PNG and BMP are resized for real; JPEG/GIF/WebP are reported and skipped (they need Pillow). `--width` / `--height` / `--max` / `--scale`, `--out`, `--suffix`, `--in-place`, `--dry-run`, `--recursive`. Never overwrites by accident. |
@@ -21,7 +21,7 @@
 ## Usage
 
 ```bash
-python -m unittest discover -s tests -v   # run the test suite (197 tests)
+python -m unittest discover -s tests -v   # run the test suite (205 tests)
 python toolkit.py                              # interactive menu for all tools
 python toolkit.py --version                      # show the toolkit version
 python toolkit.py organize ~/Downloads --dry-run  # or run a tool directly
@@ -30,6 +30,7 @@ python organize.py ~/Downloads            # organize for real
 python organize.py ~/Downloads --dry-run  # preview first
 python organize.py ~/Downloads --recursive  # tidy nested folders too
 python dupfinder.py ~/Downloads           # find duplicates by content hash
+python dupfinder.py ~/Downloads --min-size 10MB  # only files 10 MB or bigger
 python dupfinder.py ~/Downloads --move-to ~/dupes  # quarantine the extras
 python rename.py ~/Photos --prefix vacay- --replace " :_" --numbering  # vacay-IMG_001_01.jpg …
 python rename.py ~/Photos --dry-run --prefix vacay-  # preview first

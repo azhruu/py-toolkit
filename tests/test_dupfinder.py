@@ -13,7 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from dupfinder import find_duplicates, human, sha256_of
+from dupfinder import find_duplicates, human, parse_size, sha256_of
 
 
 def _names(groups):
@@ -109,6 +109,65 @@ class TestHuman(unittest.TestCase):
         self.assertEqual(human(1024), "1.0 KB")
         self.assertEqual(human(1536), "1.5 KB")
         self.assertEqual(human(1024 * 1024), "1.0 MB")
+
+
+class TestParseSize(unittest.TestCase):
+    def test_plain_bytes(self):
+        self.assertEqual(parse_size("1024"), 1024)
+        self.assertEqual(parse_size("0"), 0)
+
+    def test_suffixes(self):
+        self.assertEqual(parse_size("1KB"), 1024)
+        self.assertEqual(parse_size("1K"), 1024)
+        self.assertEqual(parse_size("10MB"), 10 * 1024 ** 2)
+        self.assertEqual(parse_size("2GB"), 2 * 1024 ** 3)
+        self.assertEqual(parse_size("1TB"), 1024 ** 4)
+
+    def test_case_and_whitespace_insensitive(self):
+        self.assertEqual(parse_size(" 10mb "), 10 * 1024 ** 2)
+        self.assertEqual(parse_size("5Kb"), 5 * 1024)
+
+    def test_fractional(self):
+        self.assertEqual(parse_size("1.5KB"), 1536)
+        self.assertEqual(parse_size("0.5MB"), 512 * 1024)
+
+    def test_matches_dirsize_parsing(self):
+        from dirsize import parse_size as dirsize_parse_size
+        for text in ("1024", "10KB", "1.5MB", "2G", "500", "1TB"):
+            self.assertEqual(parse_size(text), dirsize_parse_size(text))
+
+    def test_bad_input_raises(self):
+        for bad in ("", "MB", "10XB", "ten", "-5KB"):
+            with self.assertRaises(ValueError, msg=bad):
+                parse_size(bad)
+
+
+class TestMinSizeCLI(unittest.TestCase):
+    def test_human_min_size_filters_via_cli(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp) / "src"
+            folder.mkdir()
+            (folder / "small1.txt").write_bytes(b"s" * 100)
+            (folder / "small2.txt").write_bytes(b"s" * 100)
+            (folder / "big1.bin").write_bytes(b"B" * 3000)
+            (folder / "big2.bin").write_bytes(b"B" * 3000)
+            script = Path(__file__).resolve().parent.parent / "dupfinder.py"
+            result = subprocess.run(
+                [sys.executable, str(script), str(folder), "--min-size", "1KB"],
+                capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0)
+            self.assertIn("big1.bin", result.stdout)
+            self.assertNotIn("small1.txt", result.stdout)
+            self.assertIn("1 duplicate group", result.stdout)
+
+    def test_bad_min_size_is_a_clean_error(self):
+        script = Path(__file__).resolve().parent.parent / "dupfinder.py"
+        result = subprocess.run(
+            [sys.executable, str(script), ".", "--min-size", "10XB"],
+            capture_output=True, text=True)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("bad size", result.stderr)
 
 
 class TestMoveToCLI(unittest.TestCase):

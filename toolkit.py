@@ -64,7 +64,7 @@ PROMPTS = {
     ],
     "dupfinder": [
         ("Folder to scan (recursively)", None, ""),
-        ("Minimum file size in bytes (blank = 1)", "--min-size", ""),
+        ("Minimum file size (blank = 1 byte, e.g. 10MB)", "--min-size", ""),
         ("Move duplicates to folder (blank = report only)", "--move-to", ""),
     ],
     "rename": [
