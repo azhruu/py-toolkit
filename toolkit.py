@@ -41,7 +41,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 
-__version__ = "1.3.3"
+__version__ = "1.3.4"
 
 # name -> (script, one-line description)
 TOOLS = {
@@ -218,9 +218,12 @@ def main(argv: list[str]) -> int:
         show_menu()
         return 0
     if argv[0] in ("-h", "--help"):
+        # The module docstring is the full usage guide (interactive mode,
+        # direct mode with examples, --list/--version); the old help only
+        # printed the menu and two lines, hiding all of that.
+        print(__doc__.strip())
+        print()
         show_menu()
-        print("\nDirect mode: toolkit.py <tool> [args passed to that tool]")
-        print("Interactive: toolkit.py")
         return 0
     key = resolve(argv[0])
     if key is None and argv[0].isdigit():

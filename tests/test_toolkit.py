@@ -48,6 +48,22 @@ class TestMain(unittest.TestCase):
             self.assertEqual(toolkit.main(["--list"]), 0)
         self.assertIn("organize", out.getvalue())
 
+    def test_help_shows_full_usage(self):
+        out = io.StringIO()
+        with redirect_stdout(out):
+            self.assertEqual(toolkit.main(["--help"]), 0)
+        text = out.getvalue()
+        self.assertIn("Direct mode", text)
+        self.assertIn("organize ~/Downloads", text)
+        self.assertIn("Interactive menu", text)
+        self.assertIn("dupfinder", text)
+
+    def test_help_short_flag(self):
+        out = io.StringIO()
+        with redirect_stdout(out):
+            self.assertEqual(toolkit.main(["-h"]), 0)
+        self.assertIn("Direct mode", out.getvalue())
+
     def test_menu_number_runs_that_tool(self):
         with mock.patch.object(toolkit, "run_tool", return_value=0) as run:
             self.assertEqual(toolkit.main(["1", "~/Downloads", "--dry-run"]), 0)
