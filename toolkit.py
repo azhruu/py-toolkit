@@ -11,7 +11,8 @@ quoted in a prompt ("My Photos") so they stay one argument. After a
 tool finishes you can run another one or quit (`q` / `0`, or just
 press Enter at the menu). Leaving a
 required folder or file blank cancels that tool and takes you back to
-the menu, instead of running it with no arguments.
+the menu, instead of running it with no arguments. Ctrl-C / Ctrl-D at
+a prompt does the same.
 
 Direct mode (arguments are passed straight through to the tool):
 
@@ -41,7 +42,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 
-__version__ = "1.3.4"
+__version__ = "1.3.5"
 
 # name -> (script, one-line description)
 TOOLS = {
@@ -156,7 +157,15 @@ def build_args(name: str) -> list[str] | None:
     """
     args: list[str] = []
     for question, flag, default in PROMPTS[name]:
-        answer = ask(question, default)
+        try:
+            answer = ask(question, default)
+        except SystemExit:
+            # Ctrl-C / Ctrl-D at a prompt cancels this tool and goes
+            # back to the menu, instead of quitting the whole launcher
+            # (ask() turns both into SystemExit; the menu prompt keeps
+            # quitting, since that is the way out).
+            print("(cancelled — back to the menu)\n")
+            return None
         if flag is None and not answer:
             print("(cancelled — back to the menu)\n")
             return None

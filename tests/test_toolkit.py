@@ -118,6 +118,15 @@ class TestBuildArgs(unittest.TestCase):
                 self.assertIsNone(toolkit.build_args("organize"))
             self.assertIn("cancelled", out.getvalue())
 
+    def test_ctrl_c_at_prompt_cancels_to_menu(self):
+        # ask() turns Ctrl-C / Ctrl-D into SystemExit; build_args
+        # treats that as a cancel back to the menu, not a quit.
+        with mock.patch.object(toolkit, "ask", side_effect=SystemExit(0)):
+            out = io.StringIO()
+            with redirect_stdout(out):
+                self.assertIsNone(toolkit.build_args("organize"))
+            self.assertIn("cancelled", out.getvalue())
+
     def test_positional_and_yes_no_flags(self):
         answers = iter(["/tmp/downloads", "y", "n"])
         with mock.patch.object(toolkit, "ask", side_effect=lambda *a: next(answers)):
@@ -153,6 +162,14 @@ class TestBuildArgs(unittest.TestCase):
         with mock.patch.object(toolkit, "ask", side_effect=lambda *a: next(answers)):
             self.assertEqual(toolkit.build_args("textstats"),
                              ["a.md", "b.txt"])
+
+
+class TestAsk(unittest.TestCase):
+    def test_eof_and_interrupt_raise_system_exit(self):
+        for exc in (EOFError, KeyboardInterrupt):
+            with mock.patch("builtins.input", side_effect=exc):
+                with self.assertRaises(SystemExit):
+                    toolkit.ask("Folder to organize")
 
 
 class TestInteractive(unittest.TestCase):
@@ -196,6 +213,22 @@ class TestInteractive(unittest.TestCase):
         answers = iter(["organize", "", "q"])
         with mock.patch.object(toolkit, "ask",
                                side_effect=lambda *a: next(answers)):
+            out = io.StringIO()
+            with redirect_stdout(out):
+                self.assertEqual(toolkit.interactive(), 0)
+        self.assertIn("cancelled", out.getvalue())
+        self.assertIn("Bye!", out.getvalue())
+
+    def test_ctrl_c_at_prompt_returns_to_menu_then_quit(self):
+        answers = iter(["organize", SystemExit(0), "q"])
+
+        def ask_next(*a):
+            value = next(answers)
+            if isinstance(value, BaseException):
+                raise value
+            return value
+
+        with mock.patch.object(toolkit, "ask", side_effect=ask_next):
             out = io.StringIO()
             with redirect_stdout(out):
                 self.assertEqual(toolkit.interactive(), 0)
