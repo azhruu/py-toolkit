@@ -128,16 +128,22 @@ class TestBuildArgs(unittest.TestCase):
             self.assertIn("cancelled", out.getvalue())
 
     def test_positional_and_yes_no_flags(self):
-        answers = iter(["/tmp/downloads", "y", "n"])
+        answers = iter(["/tmp/downloads", "y", "n", "n"])
         with mock.patch.object(toolkit, "ask", side_effect=lambda *a: next(answers)):
             self.assertEqual(toolkit.build_args("organize"),
                              ["/tmp/downloads", "--dry-run"])
 
     def test_recursive_prompt_adds_flag(self):
-        answers = iter(["/tmp/downloads", "n", "y"])
+        answers = iter(["/tmp/downloads", "n", "y", "n"])
         with mock.patch.object(toolkit, "ask", side_effect=lambda *a: next(answers)):
             self.assertEqual(toolkit.build_args("organize"),
                              ["/tmp/downloads", "--recursive"])
+
+    def test_prune_prompt_adds_flag(self):
+        answers = iter(["/tmp/downloads", "n", "y", "y"])
+        with mock.patch.object(toolkit, "ask", side_effect=lambda *a: next(answers)):
+            self.assertEqual(toolkit.build_args("organize"),
+                             ["/tmp/downloads", "--recursive", "--prune"])
 
     def test_blank_optional_flags_are_skipped(self):
         answers = iter(["notes.md", "", "n", "y"])
@@ -152,7 +158,7 @@ class TestBuildArgs(unittest.TestCase):
                              ["notes.md", "--top", "10"])
 
     def test_quoted_folder_with_spaces_stays_one_arg(self):
-        answers = iter(['"My Downloads"', "n", "n"])
+        answers = iter(['"My Downloads"', "n", "n", "n"])
         with mock.patch.object(toolkit, "ask", side_effect=lambda *a: next(answers)):
             self.assertEqual(toolkit.build_args("organize"),
                              ["My Downloads"])
@@ -199,7 +205,7 @@ class TestInteractive(unittest.TestCase):
         self.assertIn("Bye!", out.getvalue())
 
     def test_run_tool_then_quit(self):
-        answers = iter(["organize", "/tmp", "n", "n", "n"])
+        answers = iter(["organize", "/tmp", "n", "n", "n", "n"])
         with mock.patch.object(toolkit, "ask",
                                side_effect=lambda *a: next(answers)), \
              mock.patch.object(toolkit, "run_tool", return_value=0) as run:

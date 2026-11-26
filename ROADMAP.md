@@ -29,3 +29,4 @@ Each item lands as one complete, tested change.
 - [x] dupfinder.py `--min-size` takes human sizes — `10KB` / `1.5MB` like dirsize.py (same parsing, so the tools agree), plain bytes still work, bad sizes fail with a clear error (+ tests, launcher prompt)
 - [x] `toolkit.py --help` / `-h` prints the full usage — direct-mode examples, interactive-menu notes and the tool list from the module docstring — instead of just the menu and two lines (+ tests)
 - [x] Interactive menu: Ctrl-C / Ctrl-D at a tool prompt cancels back to the menu instead of quitting the whole launcher (the menu prompt still quits cleanly) (+ tests)
+- [x] organize.py `--prune` — with `--recursive`, folders left empty by the move are removed (deepest first, so nested empty chains collapse); the folder itself and the category folders are never removed, and a folder holding even a hidden file is left alone; dry-run and non-recursive runs prune nothing (+ tests, launcher prompt)

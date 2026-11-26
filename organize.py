@@ -2,13 +2,16 @@
 """organize.py — tidy a folder by moving files into subfolders by type.
 
 Usage:
-    python organize.py <folder> [--dry-run] [--recursive]
+    python organize.py <folder> [--dry-run] [--recursive] [--prune]
 
 Categories: Images, Documents, Audio, Video, Archives, Code, Other.
 Safe by default: never overwrites — name clashes get a numeric suffix.
 With --recursive, files in subfolders are tidied too, into the same
 top-level category folders (files already sitting in a category folder
-are left alone); without it, only the top level is touched.
+are left alone); without it, only the top level is touched. With
+--prune (and --recursive), folders left empty by the move are removed
+— the folder itself and the category folders are never removed, and a
+folder that still holds anything (even a hidden file) is left alone.
 """
 import argparse
 import shutil
@@ -66,7 +69,29 @@ def collect_files(folder: Path, recursive: bool) -> list[Path]:
     return files
 
 
-def organize(folder: Path, dry_run: bool = False, recursive: bool = False) -> int:
+def prune_empty_folders(folder: Path) -> int:
+    """Remove folders left empty under `folder`, deepest first.
+
+    Only truly empty folders go — rmdir fails on anything else, so a
+    folder holding even a hidden file survives. The folder itself and
+    the top-level category folders are never removed. Returns how many
+    folders were removed."""
+    removed = 0
+    dirs = sorted((p for p in folder.rglob("*") if p.is_dir()),
+                  key=lambda p: len(p.parts), reverse=True)
+    for d in dirs:
+        if d.parent == folder and d.name in CATEGORIES:
+            continue  # a category folder stays even when empty
+        try:
+            d.rmdir()
+            removed += 1
+        except OSError:
+            pass  # not empty (or unreadable) — leave it alone
+    return removed
+
+
+def organize(folder: Path, dry_run: bool = False, recursive: bool = False,
+             prune: bool = False) -> int:
     if not folder.is_dir():
         print(f"error: {folder} is not a folder", file=sys.stderr)
         return 1
@@ -81,7 +106,12 @@ def organize(folder: Path, dry_run: bool = False, recursive: bool = False) -> in
             target_dir.mkdir(exist_ok=True)
             shutil.move(str(item), str(dest))
         moved += 1
+    pruned = 0
+    if prune and recursive and not dry_run:
+        pruned = prune_empty_folders(folder)
     print(f"\n{'Would move' if dry_run else 'Moved'} {moved} file(s).")
+    if pruned:
+        print(f"Removed {pruned} empty folder(s).")
     return 0
 
 
@@ -91,9 +121,11 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true", help="preview only, move nothing")
     parser.add_argument("--recursive", "-r", action="store_true",
                         help="organize files in subfolders too, into the top-level category folders")
+    parser.add_argument("--prune", action="store_true",
+                        help="with --recursive, remove folders left empty by the move")
     args = parser.parse_args()
     return organize(Path(args.folder).expanduser(), dry_run=args.dry_run,
-                    recursive=args.recursive)
+                    recursive=args.recursive, prune=args.prune)
 
 
 if __name__ == "__main__":

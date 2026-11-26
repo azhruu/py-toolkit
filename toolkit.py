@@ -19,6 +19,7 @@ Direct mode (arguments are passed straight through to the tool):
     python toolkit.py organize ~/Downloads --dry-run
     python toolkit.py 1 ~/Downloads --dry-run   # same tool, by menu number
     python toolkit.py organize ~/Downloads --recursive
+    python toolkit.py organize ~/Downloads --recursive --prune
     python toolkit.py dupfinder ~/Downloads --min-size 1024
     python toolkit.py rename ~/Photos --prefix vacay- --numbering
     python toolkit.py dirsize ~/Downloads --top 5
@@ -62,6 +63,7 @@ PROMPTS = {
         ("Folder to organize", None, ""),
         ("Preview only, move nothing? [y/N]", "--dry-run", "n"),
         ("Organize subfolders too? [y/N]", "--recursive", "n"),
+        ("Remove folders left empty? [y/N]", "--prune", "n"),
     ],
     "dupfinder": [
         ("Folder to scan (recursively)", None, ""),
@@ -173,7 +175,7 @@ def build_args(name: str) -> list[str] | None:
             continue
         if flag is None:
             args.extend(split_positional(answer))
-        elif flag in ("--dry-run", "--numbering", "--recursive", "--json"):
+        elif flag in ("--dry-run", "--numbering", "--recursive", "--json", "--prune"):
             if answer.lower().startswith("y"):
                 args.append(flag)
         elif flag == "--replace":

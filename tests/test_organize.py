@@ -11,7 +11,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from organize import category_for, organize, unique_dest
+from organize import category_for, organize, prune_empty_folders, unique_dest
 
 
 class TestCategoryFor(unittest.TestCase):
@@ -159,6 +159,73 @@ class TestOrganizeRecursive(unittest.TestCase):
         # "other" sorts before "sub", so its photo.jpg takes the plain name.
         self.assertEqual((self.folder / "Images" / "photo.jpg").read_bytes(), b"img2")
         self.assertEqual((self.folder / "Images" / "photo (1).jpg").read_bytes(), b"img")
+
+
+class TestOrganizePrune(unittest.TestCase):
+    def setUp(self):
+        import tempfile
+        self._tmp = tempfile.TemporaryDirectory()
+        self.folder = Path(self._tmp.name)
+        (self.folder / "sub").mkdir()
+        (self.folder / "sub" / "deep").mkdir()
+        (self.folder / "sub" / "photo.jpg").write_bytes(b"img")
+        (self.folder / "sub" / "deep" / "notes.txt").write_bytes(b"hi")
+        # A folder whose only file is hidden: the file stays, so the
+        # folder must survive pruning.
+        (self.folder / "keepme").mkdir()
+        (self.folder / "keepme" / ".secret.txt").write_bytes(b"s")
+        (self.folder / "top.mp3").write_bytes(b"au")
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def test_prune_removes_folders_emptied_by_recursive_move(self):
+        self.assertEqual(organize(self.folder, recursive=True, prune=True), 0)
+        self.assertTrue((self.folder / "Images" / "photo.jpg").exists())
+        self.assertTrue((self.folder / "Documents" / "notes.txt").exists())
+        self.assertFalse((self.folder / "sub").exists())
+        self.assertTrue((self.folder / "keepme").exists())
+        self.assertTrue((self.folder / "keepme" / ".secret.txt").exists())
+
+    def test_prune_collapses_a_nested_empty_chain(self):
+        (self.folder / "sub" / "deep" / "deeper").mkdir()
+        (self.folder / "sub" / "deep" / "deeper" / "x.py").write_bytes(b"py")
+        self.assertEqual(organize(self.folder, recursive=True, prune=True), 0)
+        self.assertTrue((self.folder / "Code" / "x.py").exists())
+        self.assertFalse((self.folder / "sub").exists())
+
+    def test_prune_is_off_by_default(self):
+        self.assertEqual(organize(self.folder, recursive=True), 0)
+        self.assertTrue((self.folder / "sub").exists())
+        self.assertTrue((self.folder / "sub" / "deep").exists())
+
+    def test_prune_without_recursive_removes_nothing(self):
+        self.assertEqual(organize(self.folder, prune=True), 0)
+        self.assertTrue((self.folder / "sub" / "photo.jpg").exists())
+
+    def test_prune_with_dry_run_removes_nothing(self):
+        self.assertEqual(organize(self.folder, recursive=True, prune=True,
+                                  dry_run=True), 0)
+        self.assertTrue((self.folder / "sub" / "photo.jpg").exists())
+        self.assertFalse((self.folder / "Images").exists())
+
+    def test_prune_never_removes_category_folders(self):
+        images = self.folder / "Images"
+        images.mkdir()  # pre-existing and empty — must survive
+        self.assertEqual(organize(self.folder, recursive=True, prune=True), 0)
+        self.assertTrue(images.exists())
+        self.assertTrue((images / "photo.jpg").exists())
+
+    def test_prune_empty_folders_helper(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "empty").mkdir()
+            (root / "busy").mkdir()
+            (root / "busy" / "file.txt").write_bytes(b"x")
+            self.assertEqual(prune_empty_folders(root), 1)
+            self.assertFalse((root / "empty").exists())
+            self.assertTrue((root / "busy").exists())
 
 
 if __name__ == "__main__":
