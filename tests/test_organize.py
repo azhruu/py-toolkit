@@ -203,6 +203,25 @@ class TestOrganizePrune(unittest.TestCase):
         self.assertEqual(organize(self.folder, prune=True), 0)
         self.assertTrue((self.folder / "sub" / "photo.jpg").exists())
 
+    def test_prune_without_recursive_says_so(self):
+        import io
+        from contextlib import redirect_stdout
+        out = io.StringIO()
+        with redirect_stdout(out):
+            self.assertEqual(organize(self.folder, prune=True), 0)
+        self.assertIn("--prune", out.getvalue())
+        self.assertIn("--recursive", out.getvalue())
+        self.assertTrue((self.folder / "sub" / "photo.jpg").exists())
+
+    def test_prune_with_recursive_does_not_warn(self):
+        import io
+        from contextlib import redirect_stdout
+        out = io.StringIO()
+        with redirect_stdout(out):
+            self.assertEqual(organize(self.folder, recursive=True, prune=True), 0)
+        self.assertNotIn("nothing was pruned", out.getvalue())
+        self.assertFalse((self.folder / "sub").exists())
+
     def test_prune_with_dry_run_removes_nothing(self):
         self.assertEqual(organize(self.folder, recursive=True, prune=True,
                                   dry_run=True), 0)

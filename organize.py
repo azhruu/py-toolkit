@@ -112,6 +112,11 @@ def organize(folder: Path, dry_run: bool = False, recursive: bool = False,
     print(f"\n{'Would move' if dry_run else 'Moved'} {moved} file(s).")
     if pruned:
         print(f"Removed {pruned} empty folder(s).")
+    if prune and not recursive:
+        # --prune on its own is a silent no-op without this: say so,
+        # so a user who asked for pruning isn't left wondering why
+        # their empty folders are still there.
+        print("note: --prune only removes folders with --recursive; nothing was pruned.")
     return 0
 
 
